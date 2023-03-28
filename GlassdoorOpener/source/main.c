@@ -18,6 +18,8 @@ int main(void)
 	get_companies_list();
 	get_companies_review_pages();
 
+	curl_global_cleanup();
+
 	return 0;
 }
 

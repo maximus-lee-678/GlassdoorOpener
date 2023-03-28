@@ -61,25 +61,3 @@ u_int get_companies_list() {
 	return 0;
 }
 
-u_int get_companies_review_pages() {
-	FILE* fp_read = fopen(FILENAME_GLASSDOOR_COMPANIES_LIST, "r");
-	char chunk[UNIVERSAL_LENGTH];
-
-	int iterator = 0;
-	while (fgets(chunk, sizeof(chunk), fp_read) != NULL) {
-		char webpage_url[UNIVERSAL_LENGTH] = URL_GLASSDOOR_BASE;
-		chunk[strlen(chunk) - 1] = '\0';	// Remove \n read from file
-		strcat(webpage_url, chunk);			// Combine with glassdoor URL
-
-		char temp_buf[UNIVERSAL_LENGTH] = FILENAME_GLASSDOOR_COMPANY_REVIEW;
-		char temp_iter[16];
-		snprintf(temp_iter, 16, "_%d.txt", iterator);
-		strcat(temp_buf, temp_iter);
-		get_webpage(webpage_url, temp_buf);
-		iterator++;
-	}
-
-	fclose(fp_read);
-
-	return 0;
-}

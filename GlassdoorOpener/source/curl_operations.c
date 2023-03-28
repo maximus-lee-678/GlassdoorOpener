@@ -30,16 +30,15 @@ int get_webpage(char* webpage_link, char* filename_path) {
 	strncpy(store_callback.filename_path, filename_path, UNIVERSAL_LENGTH);
 
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, store_webpage);			// Callback function for storing webpage
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&store_callback);	// Callback argument
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&store_callback);		// Callback argument
 
+	// CloudFlare bypass
 	struct curl_slist* list = NULL;
 	list = curl_slist_append(list, "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0");
-
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
 
 	result = curl_easy_perform(curl);
-	curl_slist_free_all(list); /* free the list */
-
+	
 	if (result != CURLE_OK) {
 		fprintf(stderr, "[!] Could Not Fetch Webpage %s\n[!] Error : %s\n", webpage_link, curl_easy_strerror(result));
 		curl_easy_cleanup(curl);
@@ -49,6 +48,7 @@ int get_webpage(char* webpage_link, char* filename_path) {
 		fprintf(stdout, "[>] Webpage Size: %.2f KB\n", (float)store_callback.bytes / 1024);
 	}
 
+	curl_slist_free_all(list);	// free the list
 	curl_easy_cleanup(curl);
 
 	return 0;
@@ -75,4 +75,27 @@ int store_webpage(char* buffer, int itemsize, int n_items, void* userp) {
 	}
 
 	return bytes;
+}
+
+u_int get_companies_review_pages() {
+	FILE* fp_read = fopen(FILENAME_GLASSDOOR_COMPANIES_LIST, "r");
+	char chunk[UNIVERSAL_LENGTH];
+
+	int iterator = 0;
+	while (fgets(chunk, sizeof(chunk), fp_read) != NULL) {
+		char webpage_url[UNIVERSAL_LENGTH] = URL_GLASSDOOR_BASE;
+		chunk[strlen(chunk) - 1] = '\0';	// Remove \n read from file
+		strcat(webpage_url, chunk);			// Combine with glassdoor URL
+
+		char temp_buf[UNIVERSAL_LENGTH] = FILENAME_GLASSDOOR_COMPANY_REVIEW;
+		char temp_iter[16];
+		snprintf(temp_iter, 16, "_%d.txt", iterator);
+		strcat(temp_buf, temp_iter);
+		get_webpage(webpage_url, temp_buf);
+		iterator++;
+	}
+
+	fclose(fp_read);
+
+	return 0;
 }
