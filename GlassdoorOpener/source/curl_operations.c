@@ -87,10 +87,8 @@ u_int get_companies_review_pages() {
 		chunk[strlen(chunk) - 1] = '\0';	// Remove \n read from file
 		strcat(webpage_url, chunk);			// Combine with glassdoor URL
 
-		char temp_buf[UNIVERSAL_LENGTH] = FILENAME_GLASSDOOR_COMPANY_REVIEW;
-		char temp_iter[16];
-		snprintf(temp_iter, 16, "_%d.txt", iterator);
-		strcat(temp_buf, temp_iter);
+		char temp_buf[UNIVERSAL_LENGTH] = "";
+		snprintf(temp_buf, UNIVERSAL_LENGTH, FILENAME_GLASSDOOR_COMPANY_REVIEW, iterator);
 		get_webpage(webpage_url, temp_buf);
 		iterator++;
 	}
