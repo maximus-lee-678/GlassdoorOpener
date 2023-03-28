@@ -9,6 +9,7 @@
 #include <errno.h>
 
 #define UNIVERSAL_LENGTH 512
+#define REVIEW_LENGTH 2048
 #define URL_GLASSDOOR_BASE "https://www.glassdoor.sg"
 
 #define TEMP_DIRECTORY "./temp/"
@@ -25,5 +26,26 @@ typedef struct {
 	int bytes;
 	char filename_path[UNIVERSAL_LENGTH];
 }webpage_callback;
+
+typedef struct {
+	char company[UNIVERSAL_LENGTH];
+	int rating_overall;					// stars given
+	// POSITIVE, NEGATIVE, NO_OPINION, null
+	int rating_recommend_to_friend;		// Recommend
+	int rating_ceo;						// CEO Approval
+	int rating_business_outlook;		// Business Outlook
+	// optional fields
+	int rating_work_life_balance;		// Work/Life Balance
+	int rating_culture_and_values;		// Culture & Values
+	int rating_diversity_and_inclusion;	// Diversity and Inclusion
+	int rating_career_opportunities;	// Career Opportunities
+	int rating_compensation_and_benefits;	// Compensation and Benefits
+	int rating_senior_leadership;		// Senior Management
+
+	int is_current_job;
+	int length_of_employment;			// 0: no info, 1: <1 year, 2: >1 year, 3: >2 years, ...
+
+
+}review_struct;
 
 void mallocChecker(void*);
