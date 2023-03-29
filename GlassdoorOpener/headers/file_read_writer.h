@@ -30,3 +30,4 @@
 u_int get_companies_list();
 u_int process_companies_review_pages(char*);
 u_int process_one_block();
+char* get_company_base_link(int);

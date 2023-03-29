@@ -500,3 +500,27 @@ u_int process_one_block() {
 
 	return 0;
 }
+
+u_int remove_temp_review_files() {
+	for (int i = 0; i < REVIEW_PAGES_AT_ONCE; i++) {
+		char remove_target[UNIVERSAL_LENGTH];
+		snprintf(remove_target, UNIVERSAL_LENGTH, FILENAME_GLASSDOOR_COMPANY_REVIEW, i);
+		remove(remove_target);
+	}
+
+	return 0;
+}
+
+char* get_company_base_link(int company_line_number) {
+	FILE* fp_read = fopen(FILENAME_GLASSDOOR_COMPANIES_LIST, "r");
+
+	char *buffer = (char*)malloc(UNIVERSAL_LENGTH * sizeof(char));
+	int current_line = 0;
+
+	for (int i = 0; i < company_line_number; i++) {
+		fgets(buffer, UNIVERSAL_LENGTH, fp_read);
+	}
+	fclose(fp_read);
+
+	return buffer;
+}

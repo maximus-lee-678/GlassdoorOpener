@@ -54,32 +54,11 @@ int get_webpage(char* webpage_link, char* filename_path) {
 	return 0;
 }
 
-u_int get_companies_review_pages() {
-	FILE* fp_read = fopen(FILENAME_GLASSDOOR_COMPANIES_LIST, "r");
-	char chunk[UNIVERSAL_LENGTH];
-
-	int iterator = 0;
-	while (fgets(chunk, sizeof(chunk), fp_read) != NULL) {
-		char webpage_url[UNIVERSAL_LENGTH] = URL_GLASSDOOR_BASE;
-		chunk[strlen(chunk) - 1] = '\0';	// Remove \n read from file
-		strcat(webpage_url, chunk);			// Combine with glassdoor URL
-
-		char temp_buf[UNIVERSAL_LENGTH] = "";
-		snprintf(temp_buf, UNIVERSAL_LENGTH, FILENAME_GLASSDOOR_COMPANY_REVIEW, iterator);
-		get_webpage(webpage_url, temp_buf);
-		iterator++;
-	}
-
-	fclose(fp_read);
-
-	return 0;
-}
-
 /* This version never exceeds the maximum, so no checks for
  * if(transfers < NUM_URLS)
  *      add_transfer(cm, transfers++, &left);
  */
-int get_review_pages(char* review_page_link) {
+int get_review_pages(char* review_page_link, int review_page_number) {
 	CURLM* m_curl = curl_multi_init();
 
 	if (!m_curl) {
@@ -103,7 +82,10 @@ int get_review_pages(char* review_page_link) {
 	// PLEASE FREE ME
 	webpage_callback* all_callbacks = (webpage_callback*)malloc(sizeof(webpage_callback) * REVIEW_PAGES_AT_ONCE);
 
+	// Generate proper review page link
 	for (int i = 0; i < REVIEW_PAGES_AT_ONCE; i++) {
+		int link_page_number = ((review_page_number - 1) * 10) + i + 1;
+
 		all_callbacks[i].bytes = 0;
 
 		// e.g. <URL_GLASSDOOR_BASE>/Reviews/Company-E1234.htm is the OG
@@ -112,18 +94,20 @@ int get_review_pages(char* review_page_link) {
 		char final_review_page_link[UNIVERSAL_LENGTH] = URL_GLASSDOOR_BASE;
 		char temp_buf[UNIVERSAL_LENGTH];										// This is what happens when I don't use malloc for 1 second
 		strcpy(temp_buf, review_page_link);
-		temp_buf[strlen(review_page_link) - 4] = '\0';
+		temp_buf[strlen(review_page_link) - 5] = '\0';
 		char to_append[16] = "";
-		if (i == 0) {
+		if (link_page_number == 1) {
 			snprintf(to_append, 16, ".htm\0");
 		}
 		else {
-			snprintf(to_append, 16, "_P%d.htm\0", i + 1);
+			snprintf(to_append, 16, "_P%d.htm\0", link_page_number);
 		}
 
 		strcat(temp_buf, to_append);
 		strcat(final_review_page_link, temp_buf);
 		strcpy(all_callbacks[i].webpage_link, final_review_page_link);
+
+		printf("%s\n", all_callbacks[i].webpage_link);
 
 		// Generate filename_path
 		char company_review_file_path[UNIVERSAL_LENGTH];
@@ -132,6 +116,7 @@ int get_review_pages(char* review_page_link) {
 	}
 
 	for (transfers = 0; transfers < REVIEW_PAGES_AT_ONCE; transfers++) {
+		// pointer arithmetic offset
 		review_pages_transfer(m_curl, transfers, all_callbacks + transfers, &left);
 	}
 
@@ -168,6 +153,7 @@ int get_review_pages(char* review_page_link) {
 
 	} while (left);
 
+	free(all_callbacks);
 	curl_multi_cleanup(m_curl);
 
 	return 0;
