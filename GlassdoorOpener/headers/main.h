@@ -10,6 +10,7 @@
 #include <errno.h>
 
 #define COMPANIES_PER_PAGE 10
+#define REVIEW_PAGES_AT_ONCE 10
 #define REVIEWS_PER_PAGE 10
 
 #define UNIVERSAL_LENGTH 512
@@ -30,6 +31,7 @@
 typedef struct {
 	int bytes;
 	char filename_path[UNIVERSAL_LENGTH];
+	char webpage_link[UNIVERSAL_LENGTH];
 }webpage_callback;
 
 typedef struct {
@@ -56,7 +58,7 @@ typedef struct {
 	char review_summary[UNIVERSAL_LENGTH];	// Review Title
 	char pros[REVIEW_LENGTH];
 	char cons[REVIEW_LENGTH];
-	char advice[REVIEW_LENGTH];				// Advice to Management
+	char advice_to_management[REVIEW_LENGTH];
 }review_struct;
 
 void mallocChecker(void*);

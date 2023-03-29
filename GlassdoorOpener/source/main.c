@@ -17,7 +17,8 @@ int main(void)
 	//get_webpage("https://www.glassdoor.sg/Reviews/index.htm?overall_rating_low=3.5&page=1&filterType=RATING_OVERALL", FILENAME_GLASSDOOR_COMPANIES);
 	//get_companies_list();
 	//get_companies_review_pages();
-	process_companies_review_pages();
+	get_review_pages("/Reviews/Accenture-Reviews-E4138.htm");
+	process_one_block();
 
 	curl_global_cleanup();
 
