@@ -24,6 +24,9 @@
     <ClCompile Include="source\file_read_writer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\user_interaction.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\curl_operations.h">
@@ -33,6 +36,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="headers\main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\user_interaction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

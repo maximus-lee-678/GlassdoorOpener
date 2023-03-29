@@ -10,8 +10,11 @@
 #include <errno.h>
 
 #define COMPANIES_PER_PAGE 10
+
+#define REVIEW_GET_REPITIONS 10
 #define REVIEW_PAGES_AT_ONCE 10
 #define REVIEWS_PER_PAGE 10
+#define REVIEWS_TOTAL_PER_COMPANY 1000
 
 #define UNIVERSAL_LENGTH 512
 #define REVIEW_LENGTH 2048
@@ -20,10 +23,11 @@
 #define TEMP_DIRECTORY "./temp/"
 #define PERM_DIRECTORY "./out/"
 #define FILENAME_GLASSDOOR_COMPANIES "./temp/companies_page.txt"
-#define FILENAME_GLASSDOOR_COMPANIES_LIST "./temp/companies_list.txt"
 #define FILENAME_GLASSDOOR_COMPANY_REVIEW "./temp/company_review_%d.txt"
-#define FILENAME_GLASSDOOR_OUTPUT "./out/reviews.tsv"
-
+#define FILENAME_GLASSDOOR_PURGATORY_OUTPUT "./temp/temp_reviews.tsv"
+#define FILENAME_GLASSDOOR_FINAL_OUTPUT "./out/reviews.tsv"
+#define FILENAME_GLASSDOOR_COMPANIES_LIST "./companies_list.txt"
+#define FINAL_ID_CONTAINING_FILE "./id_counter.txt"	// This file contains the id of the last review in the final file. Incremented by 1000 at each step.
 
 #define DIVIDER_25 "=========================\n"
 #define DIVIDER_50 "==================================================\n"

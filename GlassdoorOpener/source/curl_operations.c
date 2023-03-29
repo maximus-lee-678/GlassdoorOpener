@@ -47,6 +47,7 @@ int get_webpage(char* webpage_link, char* filename_path) {
 	else {
 		fprintf(stdout, "[>] Webpage Size: %.2f KB\n", (float)store_callback.bytes / 1024);
 	}
+	fprintf(stdout, DIVIDER_50);
 
 	curl_slist_free_all(list);	// free the list
 	curl_easy_cleanup(curl);
@@ -78,8 +79,6 @@ int get_review_pages(char* review_page_link, int review_page_number) {
 	// CloudFlare bypass
 	curl_multi_setopt(m_curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0");
 
-
-	// PLEASE FREE ME
 	webpage_callback* all_callbacks = (webpage_callback*)malloc(sizeof(webpage_callback) * REVIEW_PAGES_AT_ONCE);
 
 	// Generate proper review page link
@@ -107,8 +106,6 @@ int get_review_pages(char* review_page_link, int review_page_number) {
 		strcat(final_review_page_link, temp_buf);
 		strcpy(all_callbacks[i].webpage_link, final_review_page_link);
 
-		printf("%s\n", all_callbacks[i].webpage_link);
-
 		// Generate filename_path
 		char company_review_file_path[UNIVERSAL_LENGTH];
 		snprintf(company_review_file_path, UNIVERSAL_LENGTH, FILENAME_GLASSDOOR_COMPANY_REVIEW, i);
@@ -119,6 +116,8 @@ int get_review_pages(char* review_page_link, int review_page_number) {
 		// pointer arithmetic offset
 		review_pages_transfer(m_curl, transfers, all_callbacks + transfers, &left);
 	}
+
+	fprintf(stdout, DIVIDER_25);
 
 	do {
 		int still_alive = 1;
@@ -136,8 +135,7 @@ int get_review_pages(char* review_page_link, int review_page_number) {
 				}
 
 				// msg->data.result for exit code (0), curl_easy_strerror(msg->data.result) for exit code meaning (no error)
-				fprintf(stdout, "[>] Review page downloaded.\n");
-				/*fprintf(stdout, "[>] Review page downloaded: <%s>\n", all_callbacks[url_to_review_page(all_callbacks, url)].webpage_link);*/
+				fprintf(stdout, "[>] Review page downloaded: <%s>\n", url);
 				curl_multi_remove_handle(m_curl, e);
 				curl_easy_cleanup(e);
 				left--;
@@ -153,6 +151,8 @@ int get_review_pages(char* review_page_link, int review_page_number) {
 
 	} while (left);
 
+	fprintf(stdout, DIVIDER_25);
+
 	free(all_callbacks);
 	curl_multi_cleanup(m_curl);
 
@@ -163,10 +163,14 @@ void review_pages_transfer(CURLM* m_curl, int transfers, webpage_callback* callb
 {
 	CURL* sdt_curl = curl_easy_init();
 
+	fprintf(stdout, "[i] Beginning download: <%s>\n", callback->webpage_link);
+
 	curl_easy_setopt(sdt_curl, CURLOPT_WRITEFUNCTION, store_webpage);
 	curl_easy_setopt(sdt_curl, CURLOPT_WRITEDATA, (void*)callback);
 	curl_easy_setopt(sdt_curl, CURLOPT_URL, callback->webpage_link);
 	curl_easy_setopt(sdt_curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0");
+	//curl_easy_setopt(sdt_curl, CURLOPT_ACCEPT_ENCODING, "");		// enable all supported built-in compressions
+	curl_easy_setopt(sdt_curl, CURLOPT_PRIVATE, callback->webpage_link);
 
 	curl_multi_add_handle(m_curl, sdt_curl);
 
@@ -194,15 +198,4 @@ int store_webpage(char* buffer, int itemsize, int n_items, void* userp) {
 	}
 
 	return bytes;
-}
-
-u_int url_to_review_page(webpage_callback* all_callbacks, char* url) {
-	for (int i = 0; i < REVIEW_PAGES_AT_ONCE; i++) {
-
-		if (!strcmp(all_callbacks[i].webpage_link, url)) {
-			return i;
-		}
-	}
-
-	return 0;
 }

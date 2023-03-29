@@ -27,7 +27,12 @@
 #define REVIEW_POSITION_LOCATION_START "<span class=\"middle common__EiReviewDetailsStyle__newGrey\">"
 #define REVIEW_LOCATION_START "in<!-- --> <span>"
 
+void init_current_id();
 u_int get_companies_list();
 u_int process_companies_review_pages(char*);
 u_int process_one_block();
 char* get_company_base_link(int);
+u_int ascend_file();
+u_int access_ascendency_file(int);
+u_int remove_temp_review_files();
+u_int remove_purgatory_file();

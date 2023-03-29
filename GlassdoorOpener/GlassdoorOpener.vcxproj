@@ -130,11 +130,13 @@
     <ClCompile Include="source\curl_operations.c" />
     <ClCompile Include="source\file_read_writer.c" />
     <ClCompile Include="source\main.c" />
+    <ClCompile Include="source\user_interaction.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\curl_operations.h" />
     <ClInclude Include="headers\file_read_writer.h" />
     <ClInclude Include="headers\main.h" />
+    <ClInclude Include="headers\user_interaction.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

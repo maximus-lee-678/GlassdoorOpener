@@ -1,5 +1,12 @@
 #include "../headers/file_read_writer.h"
 
+
+static int current_id = 0;
+
+void init_current_id() {
+	current_id = access_ascendency_file(0) + 1;
+}
+
 // Output e.g.: /Reviews/Company-Reviews-E12345.htm
 // Insert _<page-no> before .htm to move pages
 u_int get_companies_list() {
@@ -468,12 +475,12 @@ u_int process_companies_review_pages(char* file_path) {
 
 	fclose(fp_read);
 
-	FILE* fp_write = fopen(FILENAME_GLASSDOOR_OUTPUT, "a");
+	FILE* fp_write = fopen(FILENAME_GLASSDOOR_PURGATORY_OUTPUT, "a");
 
 	// very cool
 	for (int iterator = 0; iterator < REVIEWS_PER_PAGE; iterator++) {
-		fprintf(fp_write, "%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
-			reviews[iterator].company, reviews[iterator].rating_overall, reviews[iterator].rating_recommend_to_friend,
+		fprintf(fp_write, "%d\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+			current_id++, reviews[iterator].company, reviews[iterator].rating_overall, reviews[iterator].rating_recommend_to_friend,
 			reviews[iterator].rating_ceo, reviews[iterator].rating_business_outlook, reviews[iterator].rating_work_life_balance,
 			reviews[iterator].rating_culture_and_values, reviews[iterator].rating_diversity_and_inclusion, reviews[iterator].rating_career_opportunities,
 			reviews[iterator].rating_compensation_and_benefits, reviews[iterator].rating_senior_leadership, reviews[iterator].is_current_job,
@@ -498,15 +505,7 @@ u_int process_one_block() {
 		process_companies_review_pages(temp_buf);
 	}
 
-	return 0;
-}
-
-u_int remove_temp_review_files() {
-	for (int i = 0; i < REVIEW_PAGES_AT_ONCE; i++) {
-		char remove_target[UNIVERSAL_LENGTH];
-		snprintf(remove_target, UNIVERSAL_LENGTH, FILENAME_GLASSDOOR_COMPANY_REVIEW, i);
-		remove(remove_target);
-	}
+	fprintf(stdout, DIVIDER_50);
 
 	return 0;
 }
@@ -523,4 +522,86 @@ char* get_company_base_link(int company_line_number) {
 	fclose(fp_read);
 
 	return buffer;
+}
+
+// Transfer info from purgatory to final, increment final ID
+u_int ascend_file() {
+	FILE* fp_source, * fp_dest;
+
+	fp_dest = fopen(FILENAME_GLASSDOOR_FINAL_OUTPUT, "a");
+	if (fp_dest == NULL) {
+		fprintf(stderr, "[!] Could not open file %s.\n", FILENAME_GLASSDOOR_FINAL_OUTPUT);
+		return -1;
+	}
+
+	fp_source = fopen(FILENAME_GLASSDOOR_PURGATORY_OUTPUT, "r");
+	if (fp_source == NULL) {
+		fprintf(stderr, "[!] Could not open file %s.\n", FILENAME_GLASSDOOR_PURGATORY_OUTPUT);
+		return -1;
+	}
+	else {
+		char c;
+		while ((c = fgetc(fp_source)) != EOF) {
+			fputc(c, fp_dest);
+		}
+
+		fclose(fp_source);
+		fclose(fp_dest);
+	}
+
+	// +1000
+	access_ascendency_file(1);
+
+	return 0;
+}
+
+// if parameter is 1, add 1000, else add nothing.
+// returns previous value in file (either current or current-1000).
+u_int access_ascendency_file(int is_increment) {
+	char buffer[16];
+	int stored_value = 0;
+	FILE* fp = fopen(FINAL_ID_CONTAINING_FILE, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "[!] Could not open file %s.\n", FINAL_ID_CONTAINING_FILE);
+		exit(-1);
+	}
+	fgets(buffer, sizeof(buffer), fp);
+
+	stored_value = atoi(buffer);
+	fclose(fp);
+
+	if (is_increment) {
+		stored_value += REVIEWS_TOTAL_PER_COMPANY;
+		sprintf(buffer, "%d\0", stored_value);
+
+		FILE* fp = fopen(FINAL_ID_CONTAINING_FILE, "w");
+		if (fp == NULL) {
+			fprintf(stderr, "[!] Could not open file %s.\n", FINAL_ID_CONTAINING_FILE);
+			exit(-1);
+		}
+		else {
+			fwrite(buffer, 1, strlen(buffer), fp);
+
+			fclose(fp);
+		}
+		
+	}
+
+	return stored_value;
+}
+
+u_int remove_temp_review_files() {
+	for (int i = 0; i < REVIEW_PAGES_AT_ONCE; i++) {
+		char remove_target[UNIVERSAL_LENGTH];
+		snprintf(remove_target, UNIVERSAL_LENGTH, FILENAME_GLASSDOOR_COMPANY_REVIEW, i);
+		remove(remove_target);
+	}
+
+	return 0;
+}
+
+u_int remove_purgatory_file() {
+	remove(FILENAME_GLASSDOOR_PURGATORY_OUTPUT);
+
+	return 0;
 }
