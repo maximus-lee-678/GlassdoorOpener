@@ -89,12 +89,12 @@ int get_review_pages(char* review_page_link, int review_page_number) {
 		all_callbacks[i].bytes = 0;
 
 		// e.g. <URL_GLASSDOOR_BASE>/Reviews/Company-E1234.htm is the OG
-		// get length, -4 (.htm)
+		// get length, -5 (.htm\n)
 		// add _P<num>.htm to it instead
 		char final_review_page_link[UNIVERSAL_LENGTH] = URL_GLASSDOOR_BASE;
 		char temp_buf[UNIVERSAL_LENGTH];										// This is what happens when I don't use malloc for 1 second
 		strcpy(temp_buf, review_page_link);
-		temp_buf[strlen(review_page_link) - 5] = '\0';
+		temp_buf[strlen(review_page_link) - 5] = '\0';							// Cuts .htm\n
 		char to_append[16] = "";
 		if (link_page_number == 1) {
 			snprintf(to_append, 16, ".htm\0");
