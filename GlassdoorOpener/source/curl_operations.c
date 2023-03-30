@@ -1,4 +1,5 @@
 #include "../headers/curl_operations.h"
+#include "../headers/file_read_writer.h"
 
 int get_webpage(char* webpage_link, char* filename_path) {
 	CURL* curl = curl_easy_init();
@@ -12,7 +13,7 @@ int get_webpage(char* webpage_link, char* filename_path) {
 	CURLcode result;
 	curl_easy_setopt(curl, CURLOPT_URL, webpage_link);	// Set webpage URL
 
-	FILE* initial_file;								// Create file
+	FILE* initial_file;								// Create dumping file
 	initial_file = fopen(filename_path, "w");
 	if (initial_file == NULL) {
 		fprintf(stderr, "[!] Could not create file %s.\n", filename_path);
@@ -110,6 +111,9 @@ int get_review_pages(char* review_page_link, int review_page_number) {
 		char company_review_file_path[UNIVERSAL_LENGTH];
 		snprintf(company_review_file_path, UNIVERSAL_LENGTH, FILENAME_GLASSDOOR_COMPANY_REVIEW, i);
 		strncpy(all_callbacks[i].filename_path, company_review_file_path, UNIVERSAL_LENGTH);
+
+		// Clear old ones
+		remove_temp_review_files();
 	}
 
 	for (transfers = 0; transfers < REVIEW_PAGES_AT_ONCE; transfers++) {

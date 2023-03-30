@@ -6,7 +6,7 @@
 #define HTML_GET_REVIEWS "\"cell-Reviews-url\" href=\""
 
 #define REVIEW_COMPANY_NAME "<title data-rh=\"true\">"
-#define REVIEW_START "__typename\":\"EmployerReview"
+#define REVIEW_START "__typename\":\"EmployerReview\""
 #define REVIEW_DATE "reviewDateTime"
 #define REVIEW_RATING_OVERALL "ratingOverall"
 #define REVIEW_RATING_CEO "ratingCeo"
@@ -32,7 +32,8 @@ u_int get_companies_list();
 u_int process_companies_review_pages(char*);
 u_int process_one_block();
 char* get_company_base_link(int);
-u_int ascend_file();
+u_int ascend_file(int);
 u_int access_ascendency_file(int);
 u_int remove_temp_review_files();
 u_int remove_purgatory_file();
+u_int remove_company_list();

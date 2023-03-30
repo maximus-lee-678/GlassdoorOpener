@@ -98,6 +98,7 @@ u_int process_companies_review_pages(char* file_path) {
 
 	fprintf(stdout, "[>] Reading: <%s> Stage-", file_path);
 
+	int flag = 0;
 	// 1. Gets company name
 	while (fgets(chunk, sizeof(chunk), fp_read) != NULL) {
 		// Resize the line buffer if necessary, x2 each time
@@ -114,7 +115,6 @@ u_int process_companies_review_pages(char* file_path) {
 		strncpy(line + len_used, chunk, len - len_used);
 		len_used += chunk_used;
 
-		int flag = 0;
 		// Check if line contains '\n', if yes process the line of text
 		if (line[len_used - 1] == '\n') {
 			// Look for company name
@@ -122,11 +122,12 @@ u_int process_companies_review_pages(char* file_path) {
 
 			if (examiner) {
 				flag = 1;
+				line[0] = '\0';				// "Empty" the line buffer
+
 				break;
 			}
 
-			// "Empty" the line buffer
-			line[0] = '\0';
+			line[0] = '\0';				// "Empty" the line buffer
 		}
 	}
 
@@ -141,6 +142,7 @@ u_int process_companies_review_pages(char* file_path) {
 	fprintf(stdout, "1-");
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
+	flag = 0;
 	// 2. Gets huge block of text containing most info
 	while (fgets(chunk, sizeof(chunk), fp_read) != NULL) {
 		// Resize the line buffer if necessary, x2 each time
@@ -157,7 +159,6 @@ u_int process_companies_review_pages(char* file_path) {
 		strncpy(line + len_used, chunk, len - len_used);
 		len_used += chunk_used;
 
-		int flag = 0;
 		// Check if line contains '\n', if yes process the line of text
 		if (line[len_used - 1] == '\n') {
 			// Look for start of massive block of text containing REVIEWS_PER_PAGE(10) counts of 
@@ -165,20 +166,36 @@ u_int process_companies_review_pages(char* file_path) {
 
 			if (examiner) {
 				flag = 1;
+				line[0] = '\0';				// "Empty" the line buffer
 				break;
 			}
 
-			// "Empty" the line buffer
-			line[0] = '\0';
+			line[0] = '\0';				// "Empty" the line buffer
 		}
 	}
 
-	for (int iterator = 0; iterator < REVIEWS_PER_PAGE; iterator++) {
+	// Review page is devoid of reviews, stop early
+	if (!flag) {
+		fprintf(stdout, "!\n[i] 0 reviews on this page. <%s>\n", file_path);
+
+		free(line);
+		return 1;
+	}
+
+	int reviews_per_page = REVIEWS_PER_PAGE;
+	for (int iterator = 0; iterator < reviews_per_page; iterator++) {
 		str_length = 0;
 		temp_int_buf = 0;
 
 		// Get "reviewDateTime"
 		examiner = strstr(examiner, REVIEW_DATE);
+
+		// Ensure review exists, if not, cut loop short early
+		if (examiner == NULL) {
+			reviews_per_page = iterator;
+			break;
+		}
+
 		examiner += strlen(REVIEW_DATE);							// Skip string itself
 		examiner += 3;															// Skip ":"
 		str_length = (int)(strstr(examiner, "\"") - examiner);					// Measure length until before "
@@ -440,7 +457,7 @@ u_int process_companies_review_pages(char* file_path) {
 			// Look for start of job position and location
 			examiner = strstr(line, REVIEW_POSITION_LOCATION_START);
 
-			if (examiner && iterator_3 < REVIEWS_PER_PAGE) {
+			if (examiner && iterator_3 < reviews_per_page) {
 				examiner += strlen(REVIEW_POSITION_LOCATION_START);
 				examiner = strstr(examiner, "-");
 				examiner += strlen("-");
@@ -463,7 +480,7 @@ u_int process_companies_review_pages(char* file_path) {
 				iterator_3++;
 			}
 
-			if (iterator_3 == REVIEWS_PER_PAGE)
+			if (iterator_3 == reviews_per_page)
 				break;
 
 			// "Empty" the line buffer
@@ -473,12 +490,16 @@ u_int process_companies_review_pages(char* file_path) {
 
 	fprintf(stdout, "3 ~ Done.\n");
 
+	if (reviews_per_page != REVIEWS_PER_PAGE) {
+		fprintf(stdout, "[i] Fewer than %d reviews on this page. <%s>\n", REVIEWS_PER_PAGE, file_path);
+	}
+
 	fclose(fp_read);
 
 	FILE* fp_write = fopen(FILENAME_GLASSDOOR_PURGATORY_OUTPUT, "a");
 
 	// very cool
-	for (int iterator = 0; iterator < REVIEWS_PER_PAGE; iterator++) {
+	for (int iterator = 0; iterator < reviews_per_page; iterator++) {
 		fprintf(fp_write, "%d\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
 			current_id++, reviews[iterator].company, reviews[iterator].rating_overall, reviews[iterator].rating_recommend_to_friend,
 			reviews[iterator].rating_ceo, reviews[iterator].rating_business_outlook, reviews[iterator].rating_work_life_balance,
@@ -493,21 +514,34 @@ u_int process_companies_review_pages(char* file_path) {
 
 	free(line);
 
-	return 0;
+	if (reviews_per_page != REVIEWS_PER_PAGE) {
+		return 2;
+	}
+	else {
+		return 0;
+	}
 }
 
 // Loads 10 reviews into process_companies_review_pages.
 u_int process_one_block() {
 	char temp_buf[UNIVERSAL_LENGTH] = "";
 
+	int flag = 0;
 	for (int i = 0; i < REVIEW_PAGES_AT_ONCE; i++) {
 		snprintf(temp_buf, UNIVERSAL_LENGTH, FILENAME_GLASSDOOR_COMPANY_REVIEW, i);
-		process_companies_review_pages(temp_buf);
+		if (process_companies_review_pages(temp_buf)) {		// 0 - normal, 1 - nothing found on a page, 2 - shorter than normal page found
+			flag = 1;
+			break;
+		}
 	}
 
 	fprintf(stdout, DIVIDER_50);
-
-	return 0;
+	if (flag) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
 }
 
 char* get_company_base_link(int company_line_number) {
@@ -525,12 +559,14 @@ char* get_company_base_link(int company_line_number) {
 }
 
 // Transfer info from purgatory to final, increment final ID
-u_int ascend_file() {
+u_int ascend_file(int main_page_no) {
 	FILE* fp_source, * fp_dest;
+	char final_output_path[UNIVERSAL_LENGTH];
+	snprintf(final_output_path, UNIVERSAL_LENGTH, FILENAME_GLASSDOOR_FINAL_OUTPUT, main_page_no);
 
-	fp_dest = fopen(FILENAME_GLASSDOOR_FINAL_OUTPUT, "a");
+	fp_dest = fopen(final_output_path, "a");
 	if (fp_dest == NULL) {
-		fprintf(stderr, "[!] Could not open file %s.\n", FILENAME_GLASSDOOR_FINAL_OUTPUT);
+		fprintf(stderr, "[!] Could not open file %s.\n", final_output_path);
 		return -1;
 	}
 
@@ -555,11 +591,34 @@ u_int ascend_file() {
 	return 0;
 }
 
-// if parameter is 1, add 1000, else add nothing.
-// returns previous value in file (either current or current-1000).
+// Parameters: 
+// 0 - return value in file
+// 1 - add 1000 to value. return value before add.
+// >1 - override file value to parameter. return value after change.
+// 0 and 1 used to matter, but now only >1 is used
 u_int access_ascendency_file(int is_increment) {
 	char buffer[16];
 	int stored_value = 0;
+
+	// >1
+	if (is_increment > 1) {
+		sprintf(buffer, "%d\0", is_increment);
+
+		FILE* fp = fopen(FINAL_ID_CONTAINING_FILE, "w");
+		if (fp == NULL) {
+			fprintf(stderr, "[!] Could not open file %s.\n", FINAL_ID_CONTAINING_FILE);
+			exit(-1);
+		}
+		else {
+			fwrite(buffer, 1, strlen(buffer), fp);
+
+			fclose(fp);
+		}
+
+		return is_increment;
+	}
+
+	// 0
 	FILE* fp = fopen(FINAL_ID_CONTAINING_FILE, "r");
 	if (fp == NULL) {
 		fprintf(stderr, "[!] Could not open file %s.\n", FINAL_ID_CONTAINING_FILE);
@@ -570,6 +629,7 @@ u_int access_ascendency_file(int is_increment) {
 	stored_value = atoi(buffer);
 	fclose(fp);
 
+	// 1
 	if (is_increment) {
 		stored_value += REVIEWS_TOTAL_PER_COMPANY;
 		sprintf(buffer, "%d\0", stored_value);
@@ -590,6 +650,8 @@ u_int access_ascendency_file(int is_increment) {
 	return stored_value;
 }
 
+// Called just before new files to be downloaded (cause the multi is in 'a' mode and i lazy clear there)
+// and at end of program
 u_int remove_temp_review_files() {
 	for (int i = 0; i < REVIEW_PAGES_AT_ONCE; i++) {
 		char remove_target[UNIVERSAL_LENGTH];
@@ -602,6 +664,13 @@ u_int remove_temp_review_files() {
 
 u_int remove_purgatory_file() {
 	remove(FILENAME_GLASSDOOR_PURGATORY_OUTPUT);
+
+	return 0;
+}
+
+u_int remove_company_list() {
+	remove(FILENAME_GLASSDOOR_COMPANIES);
+	remove(FILENAME_GLASSDOOR_COMPANIES_LIST);
 
 	return 0;
 }

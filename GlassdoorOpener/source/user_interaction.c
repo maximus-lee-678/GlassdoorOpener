@@ -21,8 +21,6 @@ u_int welcome() {
 		return 1;
 	}
 	else {
-		fprintf(stdout, "[~] Accepted Inputs:\n");
-		fprintf(stdout, "[~] Page Number in Digit\n");
 		fprintf(stdout, "[~] (Error Handling not implemented don't lame)\n");
 		fprintf(stdout, DIVIDER_50);
 		fprintf(stdout, "[i] Accepting Inputs\n");
@@ -30,10 +28,10 @@ u_int welcome() {
 	}
 }
 
-int receive_digits() {
+int receive_digits(char* request_string) {
 	char buffer[UNIVERSAL_LENGTH];				// buffer to hold strings
 
-	fprintf(stdout, "[<] ");
+	fprintf(stdout, "[<] %s: ", request_string);
 
 	fgets(buffer, 512, stdin);
 
