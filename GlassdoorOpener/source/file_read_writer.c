@@ -178,7 +178,9 @@ u_int process_companies_review_pages(char* file_path) {
 	if (!flag) {
 		fprintf(stdout, "!\n[i] 0 reviews on this page. <%s>\n", file_path);
 
+		fclose(fp_read);
 		free(line);
+
 		return 1;
 	}
 
@@ -193,6 +195,8 @@ u_int process_companies_review_pages(char* file_path) {
 		// Ensure review exists, if not, cut loop short early
 		if (examiner == NULL) {
 			reviews_per_page = iterator;
+			fclose(fp_read);
+
 			break;
 		}
 
