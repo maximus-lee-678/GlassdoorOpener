@@ -50,8 +50,11 @@ int main(void)
 	for (int main_page_no = page_start; main_page_no < page_start + page_count; main_page_no++) {
 		char main_url[UNIVERSAL_LENGTH];
 		snprintf(main_url, UNIVERSAL_LENGTH, URL_GLASSDOOR_HOME, main_page_no);
-		
-		get_webpage(main_url, FILENAME_GLASSDOOR_COMPANIES);
+
+		while (get_webpage(main_url, FILENAME_GLASSDOOR_COMPANIES)) {
+			delay(1000);
+		}
+
 		get_companies_list();
 
 		// for each company, get 1000 reviews (10 retrieves)
@@ -97,4 +100,16 @@ void mallocChecker(void* ptr)
 		fprintf(stderr, "[x] Unable to allocate memory!\n[x] Program closed with code %d\n", -1);
 		exit(-1);
 	}
+}
+
+// delay function
+void delay(int milliseconds)
+{
+	long pause;
+	clock_t now, then;
+	fprintf(stdout, "[i] Sleeping for: %sms.", milliseconds);
+	pause = milliseconds * (CLOCKS_PER_SEC / 1000);
+	now = then = clock();
+	while ((now - then) < pause)
+		now = clock();
 }

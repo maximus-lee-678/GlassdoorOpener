@@ -32,6 +32,8 @@ int get_webpage(char* webpage_link, char* filename_path) {
 
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, store_webpage);			// Callback function for storing webpage
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&store_callback);		// Callback argument
+	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);						// Follow Redirects
+	curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);						// >= 400, failed
 
 	// CloudFlare bypass
 	struct curl_slist* list = NULL;
@@ -41,7 +43,9 @@ int get_webpage(char* webpage_link, char* filename_path) {
 	result = curl_easy_perform(curl);
 
 	if (result != CURLE_OK) {
-		fprintf(stderr, "[!] Could Not Fetch Webpage %s\n[!] Error : %s\n", webpage_link, curl_easy_strerror(result));
+		long http_code = 0;
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+		fprintf(stderr, "[!] Could Not Fetch Webpage %s\n[!] Error : %s (Code %d)\n", webpage_link, curl_easy_strerror(result), http_code);
 		curl_easy_cleanup(curl);
 		return 3;
 	}
@@ -138,8 +142,11 @@ int get_review_pages(char* review_page_link, int review_page_number) {
 					return 2;
 				}
 
+				long http_code = 0;
+				curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &http_code);
+
 				// msg->data.result for exit code (0), curl_easy_strerror(msg->data.result) for exit code meaning (no error)
-				fprintf(stdout, "[>] Review page downloaded: <%s>\n", url);
+				fprintf(stdout, "[>] Review page downloaded: <%s> (Code %d)\n", url, http_code);
 				curl_multi_remove_handle(m_curl, e);
 				curl_easy_cleanup(e);
 				left--;
@@ -147,7 +154,7 @@ int get_review_pages(char* review_page_link, int review_page_number) {
 			else {
 				//fprintf(stderr, "[!] Could Not Fetch songs!\n[!] CURL Error Code: %d\n", msg->msg);
 				curl_multi_cleanup(m_curl);
-				return 3;
+				return 4;
 			}
 		}
 		if (left)
@@ -173,8 +180,10 @@ void review_pages_transfer(CURLM* m_curl, int transfers, webpage_callback* callb
 	curl_easy_setopt(sdt_curl, CURLOPT_WRITEDATA, (void*)callback);
 	curl_easy_setopt(sdt_curl, CURLOPT_URL, callback->webpage_link);
 	curl_easy_setopt(sdt_curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0");
-	//curl_easy_setopt(sdt_curl, CURLOPT_ACCEPT_ENCODING, "");		// enable all supported built-in compressions
+	//curl_easy_setopt(sdt_curl, CURLOPT_ACCEPT_ENCODING, "");					// enable all supported built-in compressions
 	curl_easy_setopt(sdt_curl, CURLOPT_PRIVATE, callback->webpage_link);
+	curl_easy_setopt(sdt_curl, CURLOPT_FOLLOWLOCATION, 1);						// Follow Redirects
+	curl_easy_setopt(sdt_curl, CURLOPT_FAILONERROR, 1L);						// >= 400, failed
 
 	curl_multi_add_handle(m_curl, sdt_curl);
 

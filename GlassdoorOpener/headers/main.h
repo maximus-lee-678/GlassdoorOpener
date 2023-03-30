@@ -16,7 +16,7 @@
 #define REVIEWS_PER_PAGE 10
 #define REVIEWS_TOTAL_PER_COMPANY 1000
 
-#define UNIVERSAL_LENGTH 1024
+#define UNIVERSAL_LENGTH 2048
 #define REVIEW_LENGTH 4096	// overkill? idk
 #define URL_GLASSDOOR_BASE "https://www.glassdoor.sg"
 #define URL_GLASSDOOR_HOME "https://www.glassdoor.sg/Reviews/index.htm?overall_rating_low=3.5&page=%d&filterType=RATING_OVERALL"
@@ -67,3 +67,4 @@ typedef struct {
 }review_struct;
 
 void mallocChecker(void*);
+void delay(int);

@@ -499,7 +499,7 @@ u_int process_companies_review_pages(char* file_path) {
 	}
 
 	fclose(fp_read);
-
+	printf("%d\n", reviews_per_page);
 	FILE* fp_write = fopen(FILENAME_GLASSDOOR_PURGATORY_OUTPUT, "a");
 
 	// very cool
