@@ -9,7 +9,7 @@ void init_current_id() {
 
 // Output e.g.: /Reviews/Company-Reviews-E12345.htm
 // Insert _<page-no> before .htm to move pages
-u_int get_companies_list() {
+int get_companies_list() {
 	char chunk[UNIVERSAL_LENGTH];
 	size_t len = sizeof(chunk);		// Store the chunks of text into a line buffer
 	char* line = malloc(len);
@@ -61,11 +61,51 @@ u_int get_companies_list() {
 		}
 	}
 
+	// Didnt get any companies
+	// Reason: either out of stuff to find or failed to load for some reason
+	// On fail to load, try again
+	// If none found, exit prog
+	int flag = 0;
+	if (iteration == 0) {
+		fseek(fp_read, 0, SEEK_SET);	// Reset file pointer
+		
+		// No need resizing here, already larged at top
+		while (fgets(chunk, sizeof(chunk), fp_read) != NULL) {
+			size_t len_used = strlen(line);
+			size_t chunk_used = strlen(chunk);
+
+			// Copy the chunk to the end of the line buffer
+			strncpy(line + len_used, chunk, len - len_used);
+			len_used += chunk_used;
+
+			// Check if line contains '\n', if yes process the line of text
+			if (line[len_used - 1] == '\n') {
+				examiner = strstr(line, HTML_GET_REVIEWS_FATIGUE);
+
+				if (examiner) {
+					flag = 1;
+					break;
+				}
+
+				// "Empty" the line buffer
+				line[0] = '\0';
+			}
+		}
+	}
+
 	fclose(fp_read);
 	fclose(fp_write);
 	free(line);
 
-	return 0;
+	if (iteration != 0) {
+		return iteration;
+	}
+	else if (flag == 1) {
+		return -1;
+	}
+	else {
+		return -2;
+	}
 }
 
 /*
@@ -81,7 +121,14 @@ u_int get_companies_list() {
  * 3. Gets job position and location
  */
 u_int process_companies_review_pages(char* file_path) {
-	review_struct reviews[10];
+	review_struct reviews[REVIEWS_PER_PAGE];
+
+	// Stack overflow necessitates this
+	for (int i = 0; i < REVIEWS_PER_PAGE; i++) {
+		reviews[i].pros = (char*)malloc(REVIEW_LENGTH * sizeof(char));
+		reviews[i].cons = (char*)malloc(REVIEW_LENGTH * sizeof(char));
+		reviews[i].advice_to_management = (char*)malloc(REVIEW_LENGTH * sizeof(char));
+	}
 
 	char chunk[UNIVERSAL_LENGTH];
 	size_t len = sizeof(chunk);		// Store the chunks of text into a line buffer
@@ -499,7 +546,7 @@ u_int process_companies_review_pages(char* file_path) {
 	}
 
 	fclose(fp_read);
-	printf("%d\n", reviews_per_page);
+
 	FILE* fp_write = fopen(FILENAME_GLASSDOOR_PURGATORY_OUTPUT, "a");
 
 	// very cool
@@ -515,6 +562,12 @@ u_int process_companies_review_pages(char* file_path) {
 	}
 
 	fclose(fp_write);
+
+	for (int i = 0; i < REVIEWS_PER_PAGE; i++) {
+		free(reviews[i].pros);
+		free(reviews[i].cons);
+		free(reviews[i].advice_to_management);
+	}
 
 	free(line);
 
@@ -551,7 +604,7 @@ u_int process_one_block() {
 char* get_company_base_link(int company_line_number) {
 	FILE* fp_read = fopen(FILENAME_GLASSDOOR_COMPANIES_LIST, "r");
 
-	char *buffer = (char*)malloc(UNIVERSAL_LENGTH * sizeof(char));
+	char* buffer = (char*)malloc(UNIVERSAL_LENGTH * sizeof(char));
 	int current_line = 0;
 
 	for (int i = 0; i < company_line_number; i++) {
@@ -648,7 +701,7 @@ u_int access_ascendency_file(int is_increment) {
 
 			fclose(fp);
 		}
-		
+
 	}
 
 	return stored_value;

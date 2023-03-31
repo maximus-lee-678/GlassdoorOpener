@@ -4,6 +4,7 @@
 #include "curl_operations.h"
 
 #define HTML_GET_REVIEWS "\"cell-Reviews-url\" href=\""
+#define HTML_GET_REVIEWS_FATIGUE "<b>No Results Found</b>"
 
 #define REVIEW_COMPANY_NAME "<title data-rh=\"true\">"
 #define REVIEW_START "__typename\":\"EmployerReview\""
@@ -28,7 +29,7 @@
 #define REVIEW_LOCATION_START "in<!-- --> <span>"
 
 void init_current_id();
-u_int get_companies_list();
+int get_companies_list();
 u_int process_companies_review_pages(char*);
 u_int process_one_block();
 char* get_company_base_link(int);

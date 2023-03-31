@@ -8,6 +8,7 @@
 #include <direct.h>
 #include <conio.h>
 #include <errno.h>
+#include <windows.h>
 
 #define COMPANIES_PER_PAGE 10
 
@@ -17,7 +18,7 @@
 #define REVIEWS_TOTAL_PER_COMPANY 1000
 
 #define UNIVERSAL_LENGTH 2048
-#define REVIEW_LENGTH 4096	// overkill? idk
+#define REVIEW_LENGTH 32768	// Longest Review so far: First Derivative pg40 @18868
 #define URL_GLASSDOOR_BASE "https://www.glassdoor.sg"
 #define URL_GLASSDOOR_HOME "https://www.glassdoor.sg/Reviews/index.htm?overall_rating_low=3.5&page=%d&filterType=RATING_OVERALL"
 
@@ -57,14 +58,13 @@ typedef struct {
 	int is_current_job;
 	int length_of_employment;				// 0: no info, 1: <1 year, 2: >1 year, 3: >2 years, ...
 	char review_date_time[64];
-	char position[UNIVERSAL_LENGTH];		
+	char position[UNIVERSAL_LENGTH];
 	char country[UNIVERSAL_LENGTH];
-	
+
 	char review_summary[UNIVERSAL_LENGTH];	// Review Title
-	char pros[REVIEW_LENGTH];
-	char cons[REVIEW_LENGTH];
-	char advice_to_management[REVIEW_LENGTH];
+	char* pros;								// These must malloc, unironically stack overflow
+	char* cons;								// These must malloc, unironically stack overflow
+	char* advice_to_management;				// These must malloc, unironically stack overflow
 }review_struct;
 
 void mallocChecker(void*);
-void delay(int);

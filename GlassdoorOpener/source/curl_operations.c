@@ -32,13 +32,9 @@ int get_webpage(char* webpage_link, char* filename_path) {
 
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, store_webpage);			// Callback function for storing webpage
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&store_callback);		// Callback argument
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, USER_AGENT);
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);						// Follow Redirects
 	curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);						// >= 400, failed
-
-	// CloudFlare bypass
-	struct curl_slist* list = NULL;
-	list = curl_slist_append(list, "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0");
-	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
 
 	result = curl_easy_perform(curl);
 
@@ -54,7 +50,6 @@ int get_webpage(char* webpage_link, char* filename_path) {
 	}
 	fprintf(stdout, DIVIDER_50);
 
-	curl_slist_free_all(list);	// free the list
 	curl_easy_cleanup(curl);
 
 	return 0;
@@ -82,7 +77,7 @@ int get_review_pages(char* review_page_link, int review_page_number) {
 
 	curl_multi_setopt(m_curl, CURLMOPT_MAXCONNECTS, (long)REVIEW_PAGES_AT_ONCE);	// Set maximum parallel count
 	// CloudFlare bypass
-	curl_multi_setopt(m_curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0");
+	curl_multi_setopt(m_curl, CURLOPT_USERAGENT, USER_AGENT);
 
 	webpage_callback* all_callbacks = (webpage_callback*)malloc(sizeof(webpage_callback) * REVIEW_PAGES_AT_ONCE);
 
@@ -136,15 +131,14 @@ int get_review_pages(char* review_page_link, int review_page_number) {
 				char* url;
 				CURL* e = msg->easy_handle;
 				curl_easy_getinfo(msg->easy_handle, CURLINFO_PRIVATE, &url);
-				if (msg->data.result) {
-					fprintf(stderr, "[!] Could Not Fetch!\n[!] Error : Code %d - %s\n", msg->data.result, curl_easy_strerror(msg->data.result));
-					curl_multi_cleanup(m_curl);
-					return 2;
-				}
-
 				long http_code = 0;
 				curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &http_code);
 
+				if (msg->data.result) {
+					fprintf(stderr, "[!] Could Not Fetch!\n[!] Error : Code %d - %s (Code %d)\n", msg->data.result, curl_easy_strerror(msg->data.result), http_code);
+					curl_multi_cleanup(m_curl);
+					return 2;
+				}
 				// msg->data.result for exit code (0), curl_easy_strerror(msg->data.result) for exit code meaning (no error)
 				fprintf(stdout, "[>] Review page downloaded: <%s> (Code %d)\n", url, http_code);
 				curl_multi_remove_handle(m_curl, e);
@@ -152,7 +146,7 @@ int get_review_pages(char* review_page_link, int review_page_number) {
 				left--;
 			}
 			else {
-				//fprintf(stderr, "[!] Could Not Fetch songs!\n[!] CURL Error Code: %d\n", msg->msg);
+				fprintf(stderr, "[!] Could Not Fetch Page!\n[!] CURL Error Code: %d\n", msg->msg);
 				curl_multi_cleanup(m_curl);
 				return 4;
 			}
@@ -179,7 +173,7 @@ void review_pages_transfer(CURLM* m_curl, int transfers, webpage_callback* callb
 	curl_easy_setopt(sdt_curl, CURLOPT_WRITEFUNCTION, store_webpage);
 	curl_easy_setopt(sdt_curl, CURLOPT_WRITEDATA, (void*)callback);
 	curl_easy_setopt(sdt_curl, CURLOPT_URL, callback->webpage_link);
-	curl_easy_setopt(sdt_curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0");
+	curl_easy_setopt(sdt_curl, CURLOPT_USERAGENT, USER_AGENT);
 	//curl_easy_setopt(sdt_curl, CURLOPT_ACCEPT_ENCODING, "");					// enable all supported built-in compressions
 	curl_easy_setopt(sdt_curl, CURLOPT_PRIVATE, callback->webpage_link);
 	curl_easy_setopt(sdt_curl, CURLOPT_FOLLOWLOCATION, 1);						// Follow Redirects

@@ -37,6 +37,21 @@ int main(void)
 	}
 
 	//process_companies_review_pages("./temp/company_review_1.txt");
+	//int ret_val = get_companies_list();
+	//// Very good
+	//if (ret_val > 0) {
+	//	fprintf(stdout, "[i] Read %d companies.\n", ret_val);
+	//}
+	//// Webpage indicates fatigue
+	//else if (ret_val == -1) {
+	//	fprintf(stderr, "[!] I am out of stuff to scrape!\n");
+	//	//remove_company_list();
+	//	//goto fatigued;	// Crime against humanity
+	//}
+	//// Webpage has malformed content
+	//else if (ret_val == -2) {
+	//	fprintf(stderr, "[!] Webpage is suspected to be malformed, rescraping...\n");
+	//}
 
 	welcome();
 	int page_start = receive_digits("Page Start");
@@ -51,15 +66,34 @@ int main(void)
 		char main_url[UNIVERSAL_LENGTH];
 		snprintf(main_url, UNIVERSAL_LENGTH, URL_GLASSDOOR_HOME, main_page_no);
 
-		while (get_webpage(main_url, FILENAME_GLASSDOOR_COMPANIES)) {
-			delay(1000);
-		}
+		int ret_val = 0;
+		while (1) {
+			// Try until success
+			while (get_webpage(main_url, FILENAME_GLASSDOOR_COMPANIES)) {
+				Sleep(4000);
+			}
 
-		get_companies_list();
+			ret_val = get_companies_list();
+			// Very good
+			if (ret_val > 0) {
+				fprintf(stdout, "[i] Read %d companies.\n", ret_val);
+				break;
+			}
+			// Webpage indicates fatigue
+			else if (ret_val == -1) {
+				fprintf(stderr, "[!] I am out of stuff to scrape!\n");
+				remove_company_list();
+				goto fatigued;	// Crime against humanity
+			}
+			// Webpage has malformed content
+			else if (ret_val == -2) {
+				fprintf(stderr, "[!] Webpage is suspected to be malformed, rescraping...\n");
+			}
+		}
 
 		// for each company, get 1000 reviews (10 retrieves)
 		init_current_id();
-		for (int company_no = 0; company_no < COMPANIES_PER_PAGE; company_no++) {
+		for (int company_no = 0; company_no < ret_val; company_no++) {
 			char* company_link = get_company_base_link(company_no + 1);
 
 			// each rep is 100, x10
@@ -67,6 +101,7 @@ int main(void)
 				// Any return value not == 0 is a fail, semula
 				if (get_review_pages(company_link, reps + 1)) {
 					reps--;
+					Sleep(4000);
 					continue;
 				}
 
@@ -83,6 +118,7 @@ int main(void)
 		}
 		remove_company_list();
 	}
+fatigued:
 
 	remove_temp_review_files();
 
@@ -100,16 +136,4 @@ void mallocChecker(void* ptr)
 		fprintf(stderr, "[x] Unable to allocate memory!\n[x] Program closed with code %d\n", -1);
 		exit(-1);
 	}
-}
-
-// delay function
-void delay(int milliseconds)
-{
-	long pause;
-	clock_t now, then;
-	fprintf(stdout, "[i] Sleeping for: %sms.", milliseconds);
-	pause = milliseconds * (CLOCKS_PER_SEC / 1000);
-	now = then = clock();
-	while ((now - then) < pause)
-		now = clock();
 }
