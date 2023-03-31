@@ -68,7 +68,7 @@ int get_companies_list() {
 	int flag = 0;
 	if (iteration == 0) {
 		fseek(fp_read, 0, SEEK_SET);	// Reset file pointer
-		
+
 		// No need resizing here, already larged at top
 		while (fgets(chunk, sizeof(chunk), fp_read) != NULL) {
 			size_t len_used = strlen(line);
@@ -270,31 +270,52 @@ u_int process_companies_review_pages(char* file_path) {
 		// Get "ratingCeo"
 		examiner = strstr(examiner, REVIEW_RATING_CEO);
 		examiner += strlen(REVIEW_RATING_CEO);						// Skip string itself
-		examiner += 2;															// Skip ":
-		str_length = 1;															// Rating: 1 digit 0-5 OR NULL
-		strncpy(temp_str_buf, examiner, str_length);							// Copy 1 character to temp buffer
-		if (isdigit(temp_str_buf[0])) {											// Check if digit or 'n'
-			temp_str_buf[str_length] = '\0';									// Provide a terminator
-			reviews[iterator].rating_ceo = atoi(temp_str_buf);					// Copy to real
+		examiner += 2;															// Skip ": ("ratingCeo":<n>ull) VS ("ratingCeo":<">POSITIVE")
+		if (examiner[0] != '"') {												// indicates null
+			reviews[iterator].rating_ceo = 0;
 		}
 		else {
-			reviews[iterator].rating_ceo = 0;
+			switch (examiner[1]) {
+			case 'D':	// <D>ISSAPPROVE
+				reviews[iterator].rating_ceo = 1;
+				break;
+			case 'N':	// <N>O_OPINION
+				reviews[iterator].rating_ceo = 2;
+				break;
+			case 'A':	// <A>PPROVE
+				reviews[iterator].rating_ceo = 3;
+				break;
+			default:
+				reviews[iterator].rating_ceo = -1;
+				break;
+			}
 		}
 
 		// Get "ratingBusinessOutlook"
 		examiner = strstr(examiner, REVIEW_RATING_BUSI_OUTLOOK);
 		examiner += strlen(REVIEW_RATING_BUSI_OUTLOOK);					// Skip string itself
 		examiner += 2;															// Skip ":
-		str_length = 1;															// Rating: 1 digit 0-5 OR NULL
-		strncpy(temp_str_buf, examiner, str_length);							// Copy 1 character to temp buffer
-		if (isdigit(temp_str_buf[0])) {											// Check if digit or 'n'
-			temp_str_buf[str_length] = '\0';									// Provide a terminator
-			reviews[iterator].rating_business_outlook = atoi(temp_str_buf);		// Copy to real
-		}
-		else {
+		if (examiner[0] != '"') {												// indicates null
 			reviews[iterator].rating_business_outlook = 0;
 		}
-
+		else {
+			switch (examiner[1]) {
+			case 'N':	// <N>EGATIVE / <N>EUTRAL
+				if (examiner[3] == 'G') {	// NE<G>ATIVE
+					reviews[iterator].rating_business_outlook = 1;
+				}
+				else {	// NE<U>TRAL
+					reviews[iterator].rating_business_outlook = 2;
+				}
+				break;
+			case 'P':	// <P>OSITIVE
+				reviews[iterator].rating_business_outlook = 3;
+				break;
+			default:
+				reviews[iterator].rating_business_outlook = -1;
+				break;
+			}
+		}
 
 		// Get "ratingWorkLifeBalance"
 		examiner = strstr(examiner, REVIEW_RATING_LIFE_BAL);
@@ -309,7 +330,6 @@ u_int process_companies_review_pages(char* file_path) {
 		else {
 			reviews[iterator].rating_work_life_balance = 0;
 		}
-
 
 		// Get "ratingCultureAndValues"
 		examiner = strstr(examiner, REVIEW_RATING_CULT_VAL);
@@ -358,14 +378,21 @@ u_int process_companies_review_pages(char* file_path) {
 		examiner = strstr(examiner, REVIEW_RATING_RECM_FRND);
 		examiner += strlen(REVIEW_RATING_RECM_FRND);				// Skip string itself
 		examiner += 2;															// Skip ":
-		str_length = 1;															// Rating: 1 digit 0-5 OR NULL
-		strncpy(temp_str_buf, examiner, str_length);							// Copy 1 character to temp buffer
-		if (isdigit(temp_str_buf[0])) {											// Check if digit or 'n'
-			temp_str_buf[str_length] = '\0';									// Provide a terminator
-			reviews[iterator].rating_recommend_to_friend = atoi(temp_str_buf);	// Copy to real
+		if (examiner[0] != '"') {												// indicates null
+			reviews[iterator].rating_recommend_to_friend = 0;
 		}
 		else {
-			reviews[iterator].rating_recommend_to_friend = 0;
+			switch (examiner[1]) {
+			case 'N':	// <N>EGATIVE 
+				reviews[iterator].rating_recommend_to_friend = 1;
+				break;
+			case 'P':	// <P>OSITIVE
+				reviews[iterator].rating_recommend_to_friend = 2;
+				break;
+			default:
+				reviews[iterator].rating_recommend_to_friend = -1;
+				break;
+			}
 		}
 
 		// Get "ratingCareerOpportunities"
