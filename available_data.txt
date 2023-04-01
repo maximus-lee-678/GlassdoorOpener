@@ -24,7 +24,7 @@
 
 Company Name			string
 Overall Rating			(1-5)
-Recommend? 			(1-2) <no, yes>
+Recommend? 			(1-2) nullable(0)	<no, yes>
 CEO Approval?			(1-3) nullable(0)	<no, no input, yes>
 Business Outlook?		(1-3) nullable(0)	<no, no input, yes>
 Work/Life Balance		(1-5) nullable(0)*
@@ -41,7 +41,7 @@ Country				string nullable(null)
 Review Summary			string
 Pros				string
 Cons				string
-Advice to management		string nullable("")
+Advice to management		string nullable(null)
 
 *all null or none null for 1 row
 ** 0 means less than a year, subsequent is more than n year
