@@ -448,7 +448,7 @@ u_int process_companies_review_pages(char* file_path) {
 		examiner += 1;															// Skip :
 		if (examiner[0] == '\"') {												// Check if "review OR null
 			examiner += 1;														// Skip "
-			str_length = (int)(strstr(examiner, "\"") - examiner);				// Measure length until before "
+			str_length = (int)(strstr(examiner, "\",\"prosOriginal\"") - examiner);	// Measure length until before ","prosOriginal" (need so long because some reviews contain ")
 			strncpy(reviews[iterator].pros, examiner, str_length);				// Copy
 			reviews[iterator].pros[str_length] = '\0';							// Provide a terminator
 		}
@@ -464,7 +464,7 @@ u_int process_companies_review_pages(char* file_path) {
 		examiner += 1;															// Skip :
 		if (examiner[0] == '\"') {												// Check if "review OR null
 			examiner += 1;														// Skip "
-			str_length = (int)(strstr(examiner, "\"") - examiner);				// Measure length until before "
+			str_length = (int)(strstr(examiner, "\",\"consOriginal\"") - examiner);	// Measure length until before ","consOriginal" (need so long because some reviews contain ")
 			strncpy(reviews[iterator].cons, examiner, str_length);				// Copy
 			reviews[iterator].cons[str_length] = '\0';							// Provide a terminator
 		}
@@ -480,7 +480,7 @@ u_int process_companies_review_pages(char* file_path) {
 		examiner += 1;															// Skip :
 		if (examiner[0] == '\"') {												// Check if "review OR null
 			examiner += 1;														// Skip "
-			str_length = (int)(strstr(examiner, "\"") - examiner);				// Measure length until before "
+			str_length = (int)(strstr(examiner, "\",\"summaryOriginal\"") - examiner);	// Measure length until before ","summaryOriginal" (need so long because some reviews contain ")
 			strncpy(reviews[iterator].review_summary, examiner, str_length);	// Copy
 			reviews[iterator].review_summary[str_length] = '\0';				// Provide a terminator
 		}
@@ -496,7 +496,7 @@ u_int process_companies_review_pages(char* file_path) {
 		examiner += 1;															// Skip :
 		if (examiner[0] == '\"') {												// Check if "review OR null
 			examiner += 1;														// Skip "
-			str_length = (int)(strstr(examiner, "\"") - examiner);				// Measure length until before "
+			str_length = (int)(strstr(examiner, "\",\"adviceOriginal\"") - examiner);	// Measure length until before ","adviceOriginal" (need so long because some reviews contain ")
 			strncpy(reviews[iterator].advice_to_management, examiner, str_length);	// Copy
 			reviews[iterator].advice_to_management[str_length] = '\0';			// Provide a terminator
 		}

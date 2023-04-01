@@ -24,24 +24,24 @@
 
 Company Name			string
 Overall Rating			(1-5)
-Recommend? 			(1-3) nullable	<no, no input, yes>
-CEO Approval?			(1-3) nullable	<no, no input, yes>
-Business Outlook?		(1-3) nullable	<no, no input, yes>
-Work/Life Balance		(1-5) nullable*
-Culture & Values		(1-5) nullable*
-Diversity and Inclusion		(1-5) nullable*
-Career Opportunities		(1-5) nullable*
-Compensation and Benefits	(1-5) nullable*
-Senior Management		(1-5) nullable*
+Recommend? 			(1-2) <no, yes>
+CEO Approval?			(1-3) nullable(0)	<no, no input, yes>
+Business Outlook?		(1-3) nullable(0)	<no, no input, yes>
+Work/Life Balance		(1-5) nullable(0)*
+Culture & Values		(1-5) nullable(0)*
+Diversity and Inclusion		(1-5) nullable(0)*
+Career Opportunities		(1-5) nullable(0)*
+Compensation and Benefits	(1-5) nullable(0)*
+Senior Management		(1-5) nullable(0)*
 Is current job?			(0-1)
 Length of Employment		(>=0)**
 Review Date			DateTime
 Position			string		
-Country				string nullable
+Country				string nullable(null)
 Review Summary			string
 Pros				string
 Cons				string
-Advice to management		string nullable
+Advice to management		string nullable("")
 
 *all null or none null for 1 row
 ** 0 means less than a year, subsequent is more than n year
