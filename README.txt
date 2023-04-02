@@ -21,5 +21,8 @@ To ensure that it works as intended, disable your anti-virus before usage.
 Caveats
 There is a chance that this application will not function on the "Desktop". Avoid placing the application there.
 =====
+Python dataset cleaner/merger
+Created by [https://github.com/AloysiusWooRY]
+=====
 Dataset used in
 [https://github.com/maximus-lee-678/Hadoop_Team_P2_6]
