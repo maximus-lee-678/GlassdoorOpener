@@ -1,5 +1,5 @@
 Glassdoor Review Crawler
-
+=====
 Developed in VS2022 with libcurl for Windows
 libcurl installed using vcpkg: https://github.com/microsoft/vcpkg
 
@@ -12,3 +12,14 @@ libcurl installed using vcpkg: https://github.com/microsoft/vcpkg
 
 In solution:
 1 Ensure solution configuration (next to debug buttons) is targeting right triplet
+=====
+Releases
+Find a working executable for Windows under the "Releases" tab.
+Do note that many anti-viruses may flag it as a false positive, being a completely unknown .exe file.
+To ensure that it works as intended, disable your anti-virus before usage.
+=====
+Caveats
+There is a chance that this application will not function on the "Desktop". Avoid placing the application there.
+=====
+Dataset used in
+[https://github.com/maximus-lee-678/Hadoop_Team_P2_6]
