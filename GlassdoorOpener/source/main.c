@@ -36,23 +36,6 @@ int main(void)
 		}
 	}
 
-	//process_companies_review_pages("./temp/company_review_1.txt");
-	//int ret_val = get_companies_list();
-	//// Very good
-	//if (ret_val > 0) {
-	//	fprintf(stdout, "[i] Read %d companies.\n", ret_val);
-	//}
-	//// Webpage indicates fatigue
-	//else if (ret_val == -1) {
-	//	fprintf(stderr, "[!] I am out of stuff to scrape!\n");
-	//	//remove_company_list();
-	//	//goto fatigued;	// Crime against humanity
-	//}
-	//// Webpage has malformed content
-	//else if (ret_val == -2) {
-	//	fprintf(stderr, "[!] Webpage is suspected to be malformed, rescraping...\n");
-	//}
-
 	welcome();
 	int page_start = receive_digits("Page Start");
 	int page_count = receive_digits("Page Count");
