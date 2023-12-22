@@ -1,5 +1,9 @@
-⛏ GlassdoorOpener
-==============
+.. |glassdooropener image| image:: https://github.com/maximus-lee-678/GlassdoorOpener/blob/main/GlassdoorOpener/resource/favicon.png
+  :width: 24px
+  :alt: GlassdoorOpener Logo
+
+|glassdooropener image| GlassdoorOpener 
+=======================================
 | C Glassdoor Review Crawler developed for the `HadoopWSDEG <https://github.com/maximus-lee-678/HadoopWSDEG>`_ Project.
 | Automatically grabs up to 1000 reviews for a specified number of companies.
 | Get the latest release `here <https://github.com/maximus-lee-678/GlassdoorOpener/releases>`_.
