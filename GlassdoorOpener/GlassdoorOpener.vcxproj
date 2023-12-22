@@ -137,6 +137,13 @@
     <ClInclude Include="headers\file_read_writer.h" />
     <ClInclude Include="headers\main.h" />
     <ClInclude Include="headers\user_interaction.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GlassdoorOpener.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resource\favicon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
