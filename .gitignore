@@ -6,6 +6,7 @@
 # This project excludes
 out
 temp
+id_counter.txt
 
 # User-specific files
 *.rsuser
