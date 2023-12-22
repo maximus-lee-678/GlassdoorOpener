@@ -33,3 +33,38 @@ Formats TSVs provided by GlassdoorOpener.
 * Selectable maximum review count
 * Multithreading support
 * Checkpointing
+* Storage in RAM instead of Disk
+
+🖥️ VS2022 Setup
+---------------
+
+This program was developed in VS2022 using libcurl for Windows.
+libcurl was installed using `vcpkg <https://github.com/microsoft/vcpkg>`_.
+
+1. Get `latest <https://github.com/microsoft/vcpkg/releases>`_ vcpkg zip file and extract it.
+2. Open **Developer Command Prompt for VS** and cd to wherever vckpg has been extracted to.
+3. Run:
+
+.. code-block:: console
+
+  bootstrap-vcpkg.bat
+
+4. Run:
+
+.. code-block:: console
+
+  vcpkg.exe integrate install
+
+5. Run:
+
+.. code-block:: console
+
+  vcpkg.exe install curl
+
+OR
+
+.. code-block:: console
+
+  vcpkg.exe install curl --triplet=x64
+
+6. After installation, in the project: ensure solution configuration (next to debug buttons) is targeting right triplet (x86 or x64).
